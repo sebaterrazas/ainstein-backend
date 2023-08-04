@@ -1,0 +1,8 @@
+Flask==2.2.1
+Flask-SocketIO
+python-dotenv
+simple-websocket
+langchain>=0.0.249
+openai>=0.27.8
+deeplake>=3.6.15
+tiktoken>=0.4.0
