@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_socketio import SocketIO, emit
 from threading import Lock
 
+from langchain.callbacks import get_openai_callback
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import DeepLake
 from langchain.agents import Tool, ConversationalChatAgent, AgentExecutor, AgentOutputParser
@@ -113,8 +114,9 @@ def handle_chat_message(data):
     if agent_chain is None:
         emit('error', {'error': 'Chatbot not initialized', 'type': 'chat'}, room=request.sid)
         return
-
-    response = agent_chain.run(data.get('query'))
+    with get_openai_callback() as cb:
+        response = agent_chain.run(data.get('query'))
+        print(cb)
     emit('response', {'message': response, 'type': 'chat'}, room=request.sid)
 
 @socketio.on('add_documents')
