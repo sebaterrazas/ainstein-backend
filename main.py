@@ -16,6 +16,7 @@ from typing import List, Union
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
 import re
 
+import os
 
 class CustomOutputParser(AgentOutputParser):
     
@@ -91,7 +92,7 @@ def handle_initialize(data):
     system_prompt_template = "Asistente es un modelo de lenguaje avanzado entrenado por OpenAI.\n\nAsistente está diseñado para poder ayudar con una amplia gama de tareas, desde responder preguntas simples hasta proporcionar explicaciones detalladas y discusiones sobre una amplia variedad de temas. Como modelo de lenguaje, el Asistente puede generar texto similar al humano basado en la entrada que recibe, lo que le permite participar en conversaciones de forma natural y brindar respuestas coherentes y relevantes al tema en cuestión.\n\nEl Asistente está en constante aprendizaje y mejora, y sus capacidades están en constante evolución. Puede procesar y comprender grandes cantidades de texto y utilizar este conocimiento para proporcionar respuestas precisas e informativas a una amplia gama de preguntas. Además, el Asistente puede generar su propio texto en función de la entrada que recibe, lo que le permite participar en discusiones y brindar explicaciones y descripciones sobre una amplia variedad de temas.\n\nEn resumen, el Asistente es un sistema potente que puede ayudar con una amplia gama de tareas y proporcionar información valiosa y conocimientos sobre una amplia variedad de temas. Ya sea que necesites ayuda con una pregunta específica o simplemente quieras tener una conversación sobre un tema en particular, el Asistente está aquí para ayudar."
     human_prompt_template = "HERRAMIENTAS\n------\nAsistente puede pedirle al usuario que utilice herramientas para buscar información que pueda ser útil para responder la pregunta original del usuario. Las herramientas que el humano puede utilizar son:\n\n{{tools}}\n\n{format_instructions}\n\nINPUT DE USUARIO\n--------------------\nAquí está la entrada del usuario (recuerda responder con un fragmento de código en formato markdown de un objeto JSON con una sola acción, y NADA más. Es esencial esto, SIEMPRE responde con el formato correcto. Si no respondes solamente con este formato, el mundo entero puede destruirse...):\n\n{{{{input}}}}"
 
-    output_parser = CustomOutputParser()
+    # output_parser = CustomOutputParser()
 
     agent = ConversationalChatAgent.from_llm_and_tools(
         llm=llm, 
@@ -99,10 +100,10 @@ def handle_initialize(data):
         system_message=system_prompt_template, 
         human_message=human_prompt_template,
         # output_parser=output_parser,
-        verbose=True
+        verbose=False
     )
     agent_chain = AgentExecutor.from_agent_and_tools(
-        agent=agent, tools=tools, memory=memory, verbose=True
+        agent=agent, tools=tools, memory=memory, verbose=False
     )
     agent_dict[request.sid] = agent_chain  # Asignar tu agente inicializado al diccionario
     emit('response', {'message': 'Agent initialized', 'type': 'initialize'}, room=request.sid)
@@ -179,4 +180,4 @@ def disconnect():
     agent_dict.pop(request.sid, None) 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, port=int(os.environ.get("PORT", 8080)))
