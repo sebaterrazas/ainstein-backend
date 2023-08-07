@@ -4,5 +4,5 @@ Flask
 
 ### Run server
 ```bash
-python server.py
+python main.py
 ```
